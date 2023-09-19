@@ -1,0 +1,15 @@
+[ip_address]
+address = "127.0.0.1"
+
+[port]
+value = "8080"
+
+[cmd_offline_send_hints_set]
+value = "offline_send_hints_set"
+
+[cmd_offline_send_parities_set]
+value = "offline_send_parities_set"
+
+[cmd_receive_success]
+value = "receive_success"
+
