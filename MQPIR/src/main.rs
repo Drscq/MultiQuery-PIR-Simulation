@@ -1,6 +1,8 @@
 
 mod client;
-mod serverOffline;
+mod server_offline;
+mod globals;
+
 fn main() {
     let num_of_hints = 10;
     let block_size = 32;
@@ -16,7 +18,7 @@ fn main() {
     // Check if the argument is "serverOffline"
     if args.len() > 1 && args[1] == "serverOffline" {
         // Call the serverOffline() function
-        serverOffline::main();
+        server_offline::main();
         return;
     }
     // // Call the preprocess() function
