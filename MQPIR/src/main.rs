@@ -6,7 +6,7 @@ mod globals;
 fn main() {
     let num_of_hints = 10;
     let block_size = 32;
-    let key_size = 16;
+    let key_size = 32;
     // Get the terminal arguments
     let args: Vec<String> = std::env::args().collect();
     // Check if the argument is "client"

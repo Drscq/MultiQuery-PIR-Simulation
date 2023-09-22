@@ -4,7 +4,8 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use hmac::{Hmac, Mac, NewMac};
 use sha2::Sha256;
-use generic_array::GenericArray;
+// use generic_array::GenericArray;
+// use ring::hmac::Key;
 
 // type HmacSha256 = Hmac<Sha256>;
 
@@ -12,8 +13,7 @@ use generic_array::GenericArray;
 use crate::globals;
 
 pub fn key_mac(key: &[u8], point: &[u8]) -> Vec<u8> {
-    let key = GenericArray::clone_from_slice(key);
-    let mut mac = Hmac::<Sha256>::new(&key);
+    let mut mac = Hmac::<Sha256>::new_from_slice(key).expect("HMAC can take a key of any size");
     mac.update(point);
     mac.finalize().into_bytes().to_vec()
 }
