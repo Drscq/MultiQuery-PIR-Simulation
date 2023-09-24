@@ -6,6 +6,8 @@ use hmac::{Hmac, Mac, NewMac};
 use sha2::Sha256;
 use rand::Rng;
 use crate::globals;
+use packed_simd::u8x64;
+// use packed_simd::Simd;
 
 pub fn key_mac(key: &[u8], point: &[u8]) -> Vec<u8> {
     let mut mac = Hmac::<Sha256>::new_from_slice(key).expect("HMAC can take a key of any size");
@@ -13,7 +15,16 @@ pub fn key_mac(key: &[u8], point: &[u8]) -> Vec<u8> {
     mac.finalize().into_bytes().to_vec()
 }
 
-
+fn xor_bytes(a: &[u8], b: &[u8]) -> Vec<u8> {
+    let mut result = vec![0; globals::BLOCK_SIZE];
+    for i in (0..globals::BLOCK_SIZE).step_by(u8x64::lanes()) {
+        let a_simd: u8x64 = u8x64::from_slice_unaligned(&a[i..]);
+        let b_simd: u8x64 = u8x64::from_slice_unaligned(&b[i..]);
+        let result_simd: u8x64 = a_simd ^ b_simd;
+        result_simd.write_to_slice_unaligned(&mut result[i..]);
+    }
+    result
+}
 // Globals for the server
 
 fn handle_client(mut stream: TcpStream) {
@@ -36,16 +47,18 @@ fn handle_client(mut stream: TcpStream) {
         for block in &mut block2 {
             *block = _rng.gen();
         }
+        // create SIMD vectors from the blocks
         let mut results = Vec::new();
         for _i in 0 .. globals::NUM_OF_HINTS {
            for _j in 0 .. globals::SQRT_N.lock().unwrap().clone() {
-               for _k in 0..globals::BLOCK_SIZE {
-                    results.push(block1[_k] ^ block2[_k]);
-                }
+                let result = xor_bytes(&block1, &block2);
+                results.extend(result)
             }
         }
         // Send the results to the client
-        let _ = stream.write(&results);
+        let _ = stream.write_all(&results);
+        
+        
         
 }
 
