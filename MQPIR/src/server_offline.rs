@@ -4,7 +4,7 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use hmac::{Hmac, Mac, NewMac};
 use sha2::Sha256;
-use rand::Rng;
+use rand_core::{RngCore, OsRng};
 use crate::globals;
 use packed_simd::u8x64;
 // use packed_simd::Simd;
@@ -38,15 +38,13 @@ fn handle_client(mut stream: TcpStream) {
                 let _mac = &mac[..globals::INDEX_SIZE];
             }
         }
-        let mut _rng = rand::thread_rng();
+
         let mut block1: [u8; globals::BLOCK_SIZE] = [0; globals::BLOCK_SIZE];
         let mut block2: [u8; globals::BLOCK_SIZE] = [0; globals::BLOCK_SIZE];
-        for block in &mut block1 {
-            *block = _rng.gen();
-        }
-        for block in &mut block2 {
-            *block = _rng.gen();
-        }
+
+        let mut rng = OsRng;
+        rng.fill_bytes(&mut block1);
+        rng.fill_bytes(&mut block2);
         // create SIMD vectors from the blocks
         let mut results = [0; globals::NUM_OF_HINTS * globals::SQRT_N * globals::BLOCK_SIZE];
         let mut index = 0;
