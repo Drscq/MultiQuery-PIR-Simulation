@@ -9,6 +9,7 @@ fn main() {
     if args.len() > 1 && args[1] == "client" {
         // Call the client() function
         client::preprocess();
+        client::search_hint();
         return;
     }
     // Check if the argument is "serverOffline"
