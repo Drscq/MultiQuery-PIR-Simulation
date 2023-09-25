@@ -2,18 +2,11 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::thread;
-use hmac::{Hmac, Mac, NewMac};
-use sha2::Sha256;
 use rand_core::{RngCore, OsRng};
 use crate::globals;
 use packed_simd::u8x64;
 // use packed_simd::Simd;
 
-pub fn key_mac(key: &[u8], point: &[u8]) -> Vec<u8> {
-    let mut mac = Hmac::<Sha256>::new_from_slice(key).expect("HMAC can take a key of any size");
-    mac.update(point);
-    mac.finalize().into_bytes().to_vec()
-}
 
 fn xor_bytes(a: &[u8], b: &[u8]) -> Vec<u8> {
     let mut result = vec![0; globals::BLOCK_SIZE];
@@ -34,7 +27,7 @@ fn handle_client(mut stream: TcpStream) {
             let key = &buf[i * globals::KEY_SIZE..(i+1) * globals::KEY_SIZE];
             for j in 0..(2 * globals::SQRT_N) {
                 let point = j.to_be_bytes();
-                let mac = key_mac(key, &point);
+                let mac = crate::globals::key_mac(key, &point);
                 let _mac = &mac[..globals::INDEX_SIZE];
             }
         }
