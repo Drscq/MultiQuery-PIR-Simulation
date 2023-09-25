@@ -16,8 +16,7 @@ pub fn preprocess() {
     let mut stream = TcpStream::connect(format!("{}:{}", globals::IP_ADDRESS, globals::PORT)).unwrap();
     let _ = stream.write(&keys).unwrap();
 
-    let mut buf = Vec::new();
-    buf.resize(globals::NUM_OF_HINTS * *globals::SQRT_N.lock().unwrap() * globals::BLOCK_SIZE, 0);
+    let mut buf = [0; globals::NUM_OF_HINTS * globals::SQRT_N];
     let _ = stream.read_exact(&mut buf).unwrap();
     println!("Received {} bytes", buf.len());
 }

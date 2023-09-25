@@ -32,7 +32,7 @@ fn handle_client(mut stream: TcpStream) {
         let _ = stream.read_exact(&mut buf);
         for i in 0..globals::NUM_OF_HINTS {
             let key = &buf[i * globals::KEY_SIZE..(i+1) * globals::KEY_SIZE];
-            for j in 0..globals::SQRT_N.lock().unwrap().clone() {
+            for j in 0..globals::SQRT_N {
                 let point = j.to_be_bytes();
                 let mac = key_mac(key, &point);
                 let _mac = &mac[..globals::INDEX_SIZE];
@@ -48,15 +48,19 @@ fn handle_client(mut stream: TcpStream) {
             *block = _rng.gen();
         }
         // create SIMD vectors from the blocks
-        let mut results = Vec::new();
+        let mut results = [0; globals::NUM_OF_HINTS * globals::SQRT_N * globals::BLOCK_SIZE];
+        let mut index = 0;
         for _i in 0 .. globals::NUM_OF_HINTS {
-           for _j in 0 .. globals::SQRT_N.lock().unwrap().clone() {
+           for _j in 0 .. globals::SQRT_N {
                 let result = xor_bytes(&block1, &block2);
-                results.extend(result)
+                for k in 0..globals::BLOCK_SIZE {
+                    results[index] = result[k];
+                    index += 1;
+                }
             }
         }
         // Send the results to the client
-        let _ = stream.write_all(&results);
+        let _ = stream.write(&results).unwrap();
         
         
         
