@@ -28,16 +28,17 @@ fn xor_bytes(a: &[u8], b: &[u8]) -> Vec<u8> {
 // Globals for the server
 
 fn handle_client(mut stream: TcpStream) {
-    let mut buf = [0; globals::NUM_OF_HINTS * globals::KEY_SIZE];
+    let mut buf = [0; globals::NUM_OF_HINTS * globals::KEY_SIZE * 2];
         let _ = stream.read_exact(&mut buf);
         for i in 0..globals::NUM_OF_HINTS {
             let key = &buf[i * globals::KEY_SIZE..(i+1) * globals::KEY_SIZE];
-            for j in 0..globals::SQRT_N {
+            for j in 0..(2 * globals::SQRT_N) {
                 let point = j.to_be_bytes();
                 let mac = key_mac(key, &point);
                 let _mac = &mac[..globals::INDEX_SIZE];
             }
         }
+
 
         let mut block1: [u8; globals::BLOCK_SIZE] = [0; globals::BLOCK_SIZE];
         let mut block2: [u8; globals::BLOCK_SIZE] = [0; globals::BLOCK_SIZE];
