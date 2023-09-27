@@ -1,6 +1,7 @@
 
 mod client;
 mod server_offline;
+mod server_online;
 mod globals;
 
 fn main() {
@@ -16,6 +17,12 @@ fn main() {
     if args.len() > 1 && args[1] == "serverOffline" {
         // Call the serverOffline() function
         server_offline::main();
+        return;
+    }
+    // Check if the argument is "serverOnline"
+    if args.len() > 1 && args[1] == "serverOnline" {
+        // Call the serverOnline() function
+        server_online::handle_client();
         return;
     }
 
